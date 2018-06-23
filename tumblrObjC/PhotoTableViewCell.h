@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  PhotoTableViewCell.h
 //  tumblrObjC
 //
 //  Created by jsood on 6/22/18.
@@ -8,8 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
-
+@interface PhotoTableViewCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UIImageView *photoImageView;
 
 @end
-
