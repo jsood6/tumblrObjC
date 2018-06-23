@@ -9,10 +9,12 @@
 #import "PhotoViewController.h"
 #import "PhotoTableViewCell.h"
 #import "UIImageView+AFNetworking.h"
+#import "DetailsViewController.h"
 
 @interface PhotoViewController ()
 @property (strong, nonatomic) NSArray *posts;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (nonatomic, strong) UIRefreshControl * refreshControl;
 
 @end
 
@@ -25,7 +27,17 @@
     
     self.tableView.rowHeight = 240;
     
+    [self fetchPhotos];
     
+    self.refreshControl = [[UIRefreshControl alloc]init];
+    [self.refreshControl addTarget:self action:@selector(fetchPhotos) forControlEvents:UIControlEventValueChanged];
+    
+     [self.tableView addSubview:self.refreshControl]; //attach the refreshcontrol to the tableViews
+    
+    // Do any additional setup after loading the view.
+}
+
+- (void) fetchPhotos{
     NSURL *url = [NSURL URLWithString:@"https://api.tumblr.com/v2/blog/humansofnewyork.tumblr.com/posts/photo?api_key=Q6vHoaVm5L1u2ZAW1fqv3Jw48gFzYVg9P0vH0VHl3GVy6quoGV"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
@@ -41,10 +53,11 @@
             // TODO: Reload the table view
             NSLog(@"%@", responseDict[@"posts"]);
             [self.tableView reloadData];
+            
         }
+        [self.refreshControl endRefreshing];
     }];
     [task resume];
-    // Do any additional setup after loading the view.
 }
 
 - (void)didReceiveMemoryWarning {
@@ -88,6 +101,19 @@
 
 - (NSInteger)tableView:(nonnull UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.posts.count;
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+    // Get the new view controller using [segue destinationViewController].
+    UITableViewCell * cell = sender;
+    NSIndexPath * indexPath = [self.tableView indexPathForCell:cell];
+    NSDictionary * post = self.posts[indexPath.row];
+    
+    DetailsViewController * detailView = [segue destinationViewController];
+    
+    // Pass the selected object to the new view controller.
+    detailView.post = post;
+    
 }
 
 
